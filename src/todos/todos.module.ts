@@ -8,6 +8,7 @@ import { GetTodoHandler } from './queries/get-todo/get-todo.handler.js';
 import { ListTodosHandler } from './queries/list-todos/list-todos.handler.js';
 import { Todo } from './todo.entity.js';
 import { TodosController } from './todos.controller.js';
+import { TodosResolver } from './todos.resolver.js';
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([Todo])],
@@ -18,6 +19,7 @@ import { TodosController } from './todos.controller.js';
     DeleteTodoHandler,
     GetTodoHandler,
     ListTodosHandler,
+    TodosResolver,
   ],
 })
 export class TodosModule {}
