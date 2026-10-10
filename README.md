@@ -29,6 +29,59 @@
 
 ```bash
 $ npm install
+$ cp .env.example .env
+```
+
+## Database
+
+PostgreSQL is accessed through TypeORM (`@nestjs/typeorm`). Connection settings come from `.env` (`DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`); see [.env.example](.env.example). Schema changes are applied only through migrations (`synchronize` is off).
+
+### Run the database
+
+```bash
+# start PostgreSQL in Docker (uses the DB_* values from .env)
+$ npm run db:up
+
+# stop it (data is kept in the `postgres-data` volume)
+$ npm run db:down
+
+# stop it and delete the data
+$ docker compose down -v
+```
+
+If port 5432 is already used by a local PostgreSQL, either skip Docker and create the database there (`CREATE DATABASE "dev-todo-app";`), or change `DB_PORT` in `.env` before `npm run db:up`.
+
+### Migrations
+
+Migrations live in `src/database/migrations`. Entities are any `*.entity.ts` file under `src/`. The migration commands build the project first and run against the compiled `dist/` output.
+
+```bash
+# generate a migration from the diff between entities and the database
+$ npm run migration:generate -- src/database/migrations/<MigrationName>
+
+# create an empty migration to write by hand
+$ npm run migration:create -- src/database/migrations/<MigrationName>
+
+# apply all pending migrations
+$ npm run migration:run
+
+# revert the last applied migration
+$ npm run migration:revert
+
+# list migrations and whether they were applied ([X] = applied)
+$ npm run migration:show
+```
+
+Typical workflow: change or add an entity, run `migration:generate`, review the generated file, run `migration:run`, and commit the migration together with the entity.
+
+### First run
+
+```bash
+$ npm install
+$ cp .env.example .env
+$ npm run db:up           # skip if the database already exists
+$ npm run migration:run
+$ npm run start:dev
 ```
 
 ## Compile and run the project
