@@ -1,0 +1,10 @@
+import { TodoStatus } from '../../todo-status.enum.js';
+
+export class UpdateTodoCommand {
+  constructor(
+    public readonly id: string,
+    public readonly title?: string,
+    public readonly description?: string,
+    public readonly status?: TodoStatus,
+  ) {}
+}
