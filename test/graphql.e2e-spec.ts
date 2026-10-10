@@ -16,13 +16,13 @@ describe('GraphQL (e2e)', () => {
     await app.init();
   });
 
-  it('{ health }', async () => {
+  it('{ health { status } }', async () => {
     const response = await request(app.getHttpServer())
       .post('/graphql')
-      .send({ query: '{ health }' })
+      .send({ query: '{ health { status } }' })
       .expect(200);
 
-    expect(response.body).toEqual({ data: { health: 'ok' } });
+    expect(response.body).toEqual({ data: { health: { status: 'ok' } } });
   });
 
   afterEach(async () => {
