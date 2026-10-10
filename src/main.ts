@@ -9,6 +9,14 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
 
+  const corsOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (corsOrigins.length > 0) {
+    app.enableCors({ origin: corsOrigins });
+  }
+
   const config = new DocumentBuilder()
     .setTitle('Todo API')
     .setDescription('Todo API documentation')
