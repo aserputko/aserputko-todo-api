@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Post,
@@ -21,7 +20,6 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateTodoCommand } from './commands/create-todo/create-todo.command.js';
@@ -29,11 +27,13 @@ import { DeleteTodoCommand } from './commands/delete-todo/delete-todo.command.js
 import { UpdateTodoCommand } from './commands/update-todo/update-todo.command.js';
 import { CreateTodoResponseDto } from './dto/create-todo-response.dto.js';
 import { CreateTodoDto } from './dto/create-todo.dto.js';
+import { ListTodosQueryDto } from './dto/list-todos-query.dto.js';
+import { PaginatedTodosResponseDto } from './dto/paginated-todos-response.dto.js';
 import { TodoResponseDto } from './dto/todo-response.dto.js';
 import { UpdateTodoDto } from './dto/update-todo.dto.js';
 import { GetTodoQuery } from './queries/get-todo/get-todo.query.js';
+import type { PaginatedTodos } from './queries/list-todos/list-todos.handler.js';
 import { ListTodosQuery } from './queries/list-todos/list-todos.query.js';
-import { TodoStatus } from './todo-status.enum.js';
 import { Todo } from './todo.entity.js';
 
 @ApiTags('todos')
@@ -57,13 +57,10 @@ export class TodosController {
 
   @Get()
   @ApiOperation({ summary: 'List todos' })
-  @ApiQuery({ name: 'status', enum: TodoStatus, required: false })
-  @ApiOkResponse({ type: TodoResponseDto, isArray: true })
-  @ApiBadRequestResponse({ description: 'Invalid status filter' })
-  list(
-    @Query('status', new ParseEnumPipe(TodoStatus, { optional: true })) status?: TodoStatus,
-  ): Promise<Todo[]> {
-    return this.queryBus.execute(new ListTodosQuery(status));
+  @ApiOkResponse({ type: PaginatedTodosResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid filter or pagination parameters' })
+  list(@Query() { page, pageSize, status }: ListTodosQueryDto): Promise<PaginatedTodos> {
+    return this.queryBus.execute(new ListTodosQuery(page, pageSize, status));
   }
 
   @Get(':id')

@@ -5,21 +5,34 @@ import { ListTodosHandler } from './list-todos.handler.js';
 import { ListTodosQuery } from './list-todos.query.js';
 
 describe('ListTodosHandler', () => {
-  const todos = { find: vi.fn().mockResolvedValue([]) };
+  const todos = { findAndCount: vi.fn() };
   const handler = new ListTodosHandler(todos as unknown as Repository<Todo>);
 
-  it('lists all todos newest first', async () => {
-    await handler.execute(new ListTodosQuery());
+  beforeEach(() => {
+    vi.resetAllMocks();
+    todos.findAndCount.mockResolvedValue([[{ id: 'id' }], 21]);
+  });
 
-    expect(todos.find).toHaveBeenCalledWith({ where: {}, order: { createdAt: 'DESC' } });
+  it('returns the requested page newest first with the total', async () => {
+    const result = await handler.execute(new ListTodosQuery(3, 5));
+
+    expect(todos.findAndCount).toHaveBeenCalledWith({
+      where: {},
+      order: { createdAt: 'DESC', id: 'ASC' },
+      skip: 10,
+      take: 5,
+    });
+    expect(result).toEqual({ items: [{ id: 'id' }], total: 21, page: 3, pageSize: 5 });
   });
 
   it('filters by status', async () => {
-    await handler.execute(new ListTodosQuery(TodoStatus.Done));
+    await handler.execute(new ListTodosQuery(1, 20, TodoStatus.Done));
 
-    expect(todos.find).toHaveBeenLastCalledWith({
+    expect(todos.findAndCount).toHaveBeenCalledWith({
       where: { status: TodoStatus.Done },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC', id: 'ASC' },
+      skip: 0,
+      take: 20,
     });
   });
 });
